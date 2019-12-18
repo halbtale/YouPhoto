@@ -24,14 +24,16 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axios from "axios";
+const apiUrl = "/.netlify/functions/api/images/";
+
 export default {
-    name: 'app',
+    name: "app",
     data() {
         return {
             showAddPhotoPopup: false,
-            file: '',
-            message: '',
+            file: "",
+            message: "",
             submitted: false,
             imageUrls: []
         };
@@ -41,15 +43,15 @@ export default {
     },
     methods: {
         async loadUrls() {
-            const result = await axios.get('/.netlify/functions/api/images/');
+            const result = await axios.get(apiUrl);
             const data = result.data.data;
             const urls = data.map(el => el.url);
             this.imageUrls = urls;
         },
         hideAddPhotoPopup(e) {
             if (e.target === e.currentTarget) {
-                this.file = '';
-                this.message = '';
+                this.file = "";
+                this.message = "";
                 this.showAddPhotoPopup = false;
                 this.submitted = false;
             }
@@ -59,16 +61,17 @@ export default {
             this.file = file;
         },
         async onSubmit() {
-            if (this.file) {
+            if (this.file && !this.submitted) {
                 const formData = new FormData();
-                formData.append('file', this.file);
+                formData.append("file", this.file);
                 this.submitted = true;
                 try {
-                    await axios.post('/.netlify/functions/api/images/', formData);
-                    this.message = 'Caricato';
+                    await axios.post(apiUrl, formData);
+                    this.message = "Caricato";
                     this.loadUrls();
                 } catch (error) {
-                    this.message = 'Si è verificato un errore. Riprova più tardi';
+                    this.message =
+                        "Si è verificato un errore. Riprova più tardi";
                 }
             }
         }
@@ -77,7 +80,7 @@ export default {
 </script>
 
 <style lang="scss">
-@import './assets/style/main';
+@import "./assets/style/main";
 * {
     box-sizing: inherit;
     margin: 0;

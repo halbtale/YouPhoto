@@ -23,13 +23,21 @@ exports.uploadNewImage = async (req, res) => {
     let file = req.file;
     let newFileName = file.fieldname + '-' + Date.now() + path.extname(file.originalname);
     try {
-        await uploadFile(file, newFileName);
+        const response = await uploadFile(file, newFileName);
+        const metadata = await response.getMetadata();
+        const cloudstorage_url = metadata[0].mediaLink;
+        const firebase_url = cloudstorage_url.replace(
+            'storage.googleapis.com/download/storage/v1',
+            'firebasestorage.googleapis.com/v0'
+        );
         const newImage = await Image.create({
-            url: `/.netlify/functions/api/images/${newFileName}`
+            url: firebase_url
         });
         res.json({
             message: 'success',
-            data: newImage
+            data: {
+                newImage
+            }
         });
     } catch (error) {
         console.log(error);
@@ -40,27 +48,27 @@ exports.uploadNewImage = async (req, res) => {
 };
 
 exports.download = async (req, res) => {
-    let filename = req.params.filename;
-    if (!filename) {
-        res.status(500).json({
-            message: 'error'
-        });
-        return;
-    }
-    const file = bucket.file(filename);
-    const fileStream = file.createReadStream();
-    fileStream.on('data', chunk => {
-        res.write(chunk);
-    });
-    fileStream.on('end', () => {
-        res.end();
-    });
-    fileStream.on('error', error => {
-        console.log(error);
-        res.status(500).json({
-            message: 'error'
-        });
-    });
+    // let filename = req.params.filename;
+    // if (!filename) {
+    //     res.status(500).json({
+    //         message: 'error'
+    //     });
+    //     return;
+    // }
+    // const file = bucket.file(filename);
+    // const fileStream = file.createReadStream();
+    // fileStream.on('data', chunk => {
+    //     res.write(chunk);
+    // });
+    // fileStream.on('end', () => {
+    //     res.end();
+    // });
+    // fileStream.on('error', error => {
+    //     console.log(error);
+    //     res.status(500).json({
+    //         message: 'error'
+    //     });
+    // });
 };
 
 const uploadFile = (file, newFileName) => {
@@ -73,7 +81,8 @@ const uploadFile = (file, newFileName) => {
 
         const blobStream = fileUpload.createWriteStream({
             metadata: {
-                contentType: file.mimetype
+                contentType: file.mimetype,
+                predefinedAcl: 'publicRead'
             }
         });
 
@@ -82,7 +91,7 @@ const uploadFile = (file, newFileName) => {
         });
 
         blobStream.on('finish', () => {
-            resolve('success');
+            resolve(fileUpload);
         });
 
         blobStream.end(file.buffer);
