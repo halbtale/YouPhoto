@@ -25,7 +25,7 @@ exports.uploadNewImage = async (req, res) => {
     try {
         await uploadFile(file, newFileName);
         const newImage = await Image.create({
-            url: `${req.protocol}://${req.get('Host')}/.netlify/functions/api/images/${newFileName}`
+            url: `/.netlify/functions/api/images/${newFileName}`
         });
         res.json({
             message: 'success',

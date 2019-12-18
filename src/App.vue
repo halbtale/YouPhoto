@@ -41,7 +41,7 @@ export default {
     },
     methods: {
         async loadUrls() {
-            const result = await axios.get('http://localhost:5000/.netlify/functions/api/images/');
+            const result = await axios.get('/.netlify/functions/api/images/');
             const data = result.data.data;
             const urls = data.map(el => el.url);
             this.imageUrls = urls;
@@ -64,7 +64,7 @@ export default {
                 formData.append('file', this.file);
                 this.submitted = true;
                 try {
-                    await axios.post('http://localhost:5000/.netlify/functions/api/images/', formData);
+                    await axios.post('/.netlify/functions/api/images/', formData);
                     this.message = 'Caricato';
                     this.loadUrls();
                 } catch (error) {
