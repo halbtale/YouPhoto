@@ -1,29 +1,21 @@
 # youphoto
 
 ## Project setup
+
 ```
 npm install
 ```
 
 ### Compiles and hot-reloads for development
+
 ```
-npm run serve
+npm run serve-frontend
+npm run serve-backend
 ```
 
 ### Compiles and minifies for production
-```
-npm run build
-```
 
-### Run your tests
 ```
-npm run test
+npm run build-frontend
+npm run build-backend
 ```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
