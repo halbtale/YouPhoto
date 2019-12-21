@@ -17,6 +17,6 @@ router
     .get(imagesController.getAllImages)
     .post(upload.single('file'), imagesController.uploadNewImage);
 
-router.route('/:filename').get(imagesController.download);
+router.route('/:filename').delete(imagesController.deleteImage);
 
 module.exports = router;

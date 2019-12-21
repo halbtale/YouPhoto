@@ -20,7 +20,8 @@
         "firebase-admin": "^8.8.0",
         "mongoose": "^5.6.9",
         "multer": "^1.4.2",
-        "vue": "^2.6.10"
+        "vue": "^2.6.10",
+        "vue-directive-long-press": "^1.1.0"
     },
     "devDependencies": {
         "@vue/cli-plugin-babel": "^4.1.0",

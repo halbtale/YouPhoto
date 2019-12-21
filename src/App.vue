@@ -1,13 +1,26 @@
 <template>
-    <div id="app">
+    <div id="app" @click="turnOffEditingMode">
         <header class="header">
             <h1>YouPhoto</h1>
             <img class="plus-button" src="./assets/plus.svg" @click="showAddPhotoPopup = true" />
         </header>
         <main class="content">
+            <p v-if="isLoading" class="loading-label">Caricamento...</p>
             <div class="masorny">
                 <div class="image-box" v-for="url in imageUrls" :key="url">
-                    <img :src="url" class="image" />
+                    <img
+                        :src="url"
+                        class="image"
+                        v-long-press="1000"
+                        @long-press-start="setEditingModeTimeout"
+                        @long-press-stop="clearEditingModeTimeout"
+                    />
+                    <img
+                        src="./assets/delete.svg"
+                        @click="deleteImage(url)"
+                        class="delete-button"
+                        v-if="editingMode"
+                    />
                 </div>
             </div>
         </main>
@@ -35,7 +48,11 @@ export default {
             file: "",
             message: "",
             submitted: false,
-            imageUrls: []
+            imageUrls: [],
+            editingMode: false,
+            editingModeTimeout: null,
+            isDeleting: false,
+            isLoading: true
         };
     },
     created() {
@@ -43,10 +60,15 @@ export default {
     },
     methods: {
         async loadUrls() {
-            const result = await axios.get(apiUrl);
-            const data = result.data.data;
-            const urls = data.map(el => el.url);
-            this.imageUrls = urls;
+            try {
+                const result = await axios.get(apiUrl);
+                const data = result.data.data;
+                const urls = data.map(el => el.url);
+                this.imageUrls = urls;
+                this.isLoading = false;
+            } catch (error) {
+                alert(error);
+            }
         },
         hideAddPhotoPopup(e) {
             if (e.target === e.currentTarget) {
@@ -72,6 +94,33 @@ export default {
                 } catch (error) {
                     this.message =
                         "Si è verificato un errore. Riprova più tardi";
+                }
+            }
+        },
+        setEditingModeTimeout() {
+            this.editingModeTimeout = window.setTimeout(() => {
+                this.editingMode = true;
+            }, 1000);
+        },
+        clearEditingModeTimeout() {
+            clearTimeout(this.editingModeTimeout);
+            setTimeout(() => {
+                this.editingModeTimeout = null;
+            }, 200);
+        },
+        async deleteImage(url) {
+            const filename = url.match(/file-\d+.\w+/);
+            if (!this.isDeleting) {
+                this.isDeleting = true;
+                await axios.delete(apiUrl + filename);
+                await this.loadUrls();
+                this.isDeleting = false;
+            }
+        },
+        turnOffEditingMode(e) {
+            if (!e.target.classList.contains("delete-button")) {
+                if (!this.editingModeTimeout && this.editingMode === true) {
+                    this.editingMode = false;
                 }
             }
         }
